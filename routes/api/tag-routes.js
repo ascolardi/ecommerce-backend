@@ -5,10 +5,11 @@ const { Tag, Product, ProductTag } = require('../../models');
 
 router.get('/', async (req, res) => { 
   try {
-  const tagData = await Tag.findAll({include: [{ model: Product, through: ProductTag, as: 'tag_id' }] });
+  const tagData = await Tag.findAll({include: [{ model: Product, through: ProductTag, as: 'tag_products' }] });
   res.status(200).json(tagData);
 } catch (err) {
   res.status(500).json(err);
+  console.log(err);
 }
 
 });
@@ -16,9 +17,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   // find a single tag by its `id`
   try {
-    const tagData = await Tag.findbyPk(req.params.id, {
-      include: [{ model: Product, through: ProductTag, as: 'tag_id' }]
-    });
+    const tagData = await Tag.findByPk(req.params.id);
 
     if (!tagData) {
       res.status(404).json({ message: 'No tag found with this id!' });
@@ -27,6 +26,7 @@ router.get('/:id', async (req, res) => {
     res.status(200).json(tagData);
   } catch (err) {
     res.status(500).json(err);
+    console.log(err);
   }
   // be sure to include its associated Product data
 });
@@ -34,7 +34,9 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   // create a new tag
   try {
-    const newTag = await Tag.create(req.body);
+    const newTag = await Tag.create({
+      tag_name: req.body.tag_name,
+    });
     res.status(200).json(newTag);
   } catch (err) {
     res.status(400).json(err);
